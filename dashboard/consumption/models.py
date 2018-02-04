@@ -21,4 +21,4 @@ class Consumption(models.Model):
     consumption = models.FloatField()
 
     def __str__(self):
-        return "%s - %s" % (self.datetime, self.consumption)
+        return "%s (user=%s)" % (self.pk, self.user.id)
