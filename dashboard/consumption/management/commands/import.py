@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 import os
 import pandas as pd
@@ -11,22 +11,27 @@ from consumption.models import User, Consumption
 class Command(BaseCommand):
     help = 'import data'
 
+    def add_arguments(self, parser):
+        parser.add_argument('user_data_path', nargs='?', type=str)
+        parser.add_argument('consumption_data_dir', nargs='?', type=str)
+
     def handle(self, *args, **options):
-        verbosity = int(options['verbosity'])
-
         start_time = datetime.now()
-        self.stdout.write('Started import at %s' % start_time)
 
-        self.import_users()
-        self.import_consumptions()
+        self.import_users(options['user_data_path'])
+        self.import_consumptions(options['consumption_data_dir'])
 
-        import_duration = datetime.now() - start_time
-        self.stdout.write('Import complete. Duration: %s' % import_duration)
+        self.stdout.write('Import complete. Duration: %s' % (datetime.now() - start_time))
 
-    def import_users(self, user_data_path=USER_DATA_PATH):
-        self.stdout.write('Importing user data.')
+    def import_users(self, user_data_path=None):
+        if user_data_path is None:
+            user_data_path = USER_DATA_PATH
 
+        self.stdout.write('Importing user data from %s' % user_data_path)
         User.objects.all().delete()
+
+        if not os.path.exists(user_data_path):
+            raise CommandError('The following user data path does not exist: %s' % user_data_path)
 
         df = pd.read_csv(user_data_path)
 
@@ -34,13 +39,20 @@ class Command(BaseCommand):
             User(**vals) for vals in df.to_dict('records')
         )
 
-    def import_consumptions(self, consumption_data_dir=CONSUMPTION_DATA_DIR):
+    def import_consumptions(self, consumption_data_dir=None):
+        if consumption_data_dir is None:
+            consumption_data_dir = CONSUMPTION_DATA_DIR
+
         Consumption.objects.all().delete()
 
         for user in User.objects.all():
-            self.stdout.write('Importing consumption data for User %s' % user.pk)
-
             data_path = os.path.join(consumption_data_dir, '%s.csv' % user.pk)
+
+            self.stdout.write('Importing consumption data from %s' % data_path)
+
+            if not os.path.exists(data_path):
+                self.stdout.write('No consumption data exists for User %s. Skipping.' % user.pk)
+                continue
 
             df = pd.read_csv(data_path)
             df['datetime'] = pd.to_datetime(df['datetime'], utc=True)
