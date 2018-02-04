@@ -51,7 +51,6 @@ class Command(BaseCommand):
             self.stdout.write('Importing consumption data from %s' % data_path)
 
             if not os.path.exists(data_path):
-                self.stdout.write('No consumption data exists for User %s. Skipping.' % user.pk)
                 continue
 
             df = pd.read_csv(data_path)
