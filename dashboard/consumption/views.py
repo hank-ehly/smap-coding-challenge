@@ -2,15 +2,17 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render
+from django.views import generic
 
-# Create your views here.
+from consumption.models import User
 
 
-def summary(request):
-    context = {
-        'message': 'Hello!',
-    }
-    return render(request, 'consumption/summary.html', context)
+class SummaryView(generic.ListView):
+    model = User
+    template_name = 'consumption/summary.html'
+
+    def get_queryset(self):
+        return User.objects.all()
 
 
 def detail(request):
