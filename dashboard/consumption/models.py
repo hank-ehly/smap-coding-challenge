@@ -18,11 +18,12 @@ class User(models.Model):
         return self.pk
 
     def consumptions(self):
-        query_set = Consumption.objects \
+        return Consumption.objects \
             .filter(user_id=self.pk) \
             .annotate(date=TruncDay('datetime')) \
             .values('date') \
-            .annotate(sum=Sum('consumption'))
+            .annotate(sum=Sum('consumption')) \
+            .annotate(average=Avg('consumption'))
 
 
 @python_2_unicode_compatible

@@ -9,5 +9,5 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/$', views.DetailView.as_view(), name='detail'),
 
     url(r'^api/v1/consumptions$', views.consumptions),
-    url(r'^api/v1/consumptions/(?P<pk>[0-9]+)$', views.user_consumptions),
+    url(r'^api/v1/consumptions/(?P<pk>[0-9]+)$', views.user_consumptions)
 ]

@@ -31,12 +31,5 @@ def consumptions(request):
 @require_http_methods(['GET'])
 def user_consumptions(request, *args, **kwargs):
     user_id = int(kwargs['pk'])
-
-    query_set = Consumption.objects \
-        .filter(user_id=user_id) \
-        .annotate(date=TruncDay('datetime')) \
-        .values('date') \
-        .annotate(sum=Sum('consumption')) \
-        .annotate(average=Avg('consumption'))
-
-    return JsonResponse(list(query_set), safe=False)
+    user = User.objects.get(pk=user_id)
+    return JsonResponse(list(user.consumptions()), safe=False)
