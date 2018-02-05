@@ -5,7 +5,7 @@ import os
 import pandas as pd
 
 from dashboard.settings import USER_DATA_PATH, CONSUMPTION_DATA_DIR
-from consumption.models import User, Consumption
+from consumption.models import User, Consumption, ConsumptionRollup
 
 
 class Command(BaseCommand):
@@ -20,6 +20,9 @@ class Command(BaseCommand):
 
         self.import_users(options['user_data_path'])
         self.import_consumptions(options['consumption_data_dir'])
+
+        self.stdout.write('Recalculating consumption aggregate data')
+        ConsumptionRollup.full_recalc()
 
         self.stdout.write('Import complete. Duration: %s' % (datetime.now() - start_time))
 
