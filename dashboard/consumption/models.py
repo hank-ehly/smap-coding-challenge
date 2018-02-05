@@ -15,7 +15,7 @@ class User(models.Model):
     tariff = models.CharField(max_length=2)
 
     def __str__(self):
-        return self.pk
+        return "%s" % self.pk
 
     def consumptions(self):
         return Consumption.objects \
