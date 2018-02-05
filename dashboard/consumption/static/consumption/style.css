@@ -13,11 +13,16 @@
     margin-top: 40px;
 }
 
-.summary-chart-error-alert {
+#alert {
     display: none;
 }
 
 .detail-table {
+    margin-top: 20px;
+}
+
+.summary-chart-button-group {
+    text-align: center;
     margin-top: 20px;
 }
 

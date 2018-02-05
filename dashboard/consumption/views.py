@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db.models import Sum
-from django.db.models.functions import TruncMonth, TruncDay
+from django.core.serializers import serialize
+from django.db.models import Sum, Avg
+from django.db.models.functions import TruncDay
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.views import generic
 from django.views.decorators.http import require_http_methods
 
-from consumption.models import User, Consumption
+from consumption.encoders import ConsumptionRollupEncoder
+from consumption.models import User, Consumption, ConsumptionRollup
 
 
 class SummaryView(generic.ListView):
@@ -22,13 +23,20 @@ class DetailView(generic.DetailView):
 
 
 @require_http_methods(['GET'])
-def consumptions(request, *args, **kwargs):
-    user_id = request.GET.get('user_id')
+def consumptions(request):
+    serialized_data = serialize('json', ConsumptionRollup.objects.all(), cls=ConsumptionRollupEncoder)
+    return JsonResponse(serialized_data, safe=False)
 
-    if user_id is None:
-        consumptions = Consumption.objects
-    else:
-        consumptions = Consumption.objects.filter(user_id=user_id)
 
-    qs = consumptions.annotate(time=TruncDay('datetime')).values('time').annotate(consumption=Sum('consumption'))
-    return JsonResponse({'data': list(qs)})
+@require_http_methods(['GET'])
+def user_consumptions(request, *args, **kwargs):
+    user_id = int(kwargs['pk'])
+
+    query_set = Consumption.objects \
+        .filter(user_id=user_id) \
+        .annotate(date=TruncDay('datetime')) \
+        .values('date') \
+        .annotate(sum=Sum('consumption')) \
+        .annotate(average=Avg('consumption'))
+
+    return JsonResponse(list(query_set), safe=False)
