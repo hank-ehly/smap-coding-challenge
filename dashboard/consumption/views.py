@@ -6,6 +6,7 @@ from django.db.models.functions import TruncMonth, TruncDay
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import generic
+from django.views.decorators.http import require_http_methods
 
 from consumption.models import User, Consumption
 
@@ -15,12 +16,19 @@ class SummaryView(generic.ListView):
     template_name = 'consumption/summary.html'
 
 
-def consumption_summary(request, *args, **kwargs):
-    qs = Consumption.objects.annotate(time=TruncDay('datetime')).values('time').annotate(consumption=Sum('consumption'))
-    return JsonResponse({'results': list(qs)})
+class DetailView(generic.DetailView):
+    model = User
+    template_name = 'consumption/detail.html'
 
 
-def detail(request):
-    context = {
-    }
-    return render(request, 'consumption/detail.html', context)
+@require_http_methods(['GET'])
+def consumptions(request, *args, **kwargs):
+    user_id = request.GET.get('user_id')
+
+    if user_id is None:
+        consumptions = Consumption.objects
+    else:
+        consumptions = Consumption.objects.filter(user_id=user_id)
+
+    qs = consumptions.annotate(time=TruncDay('datetime')).values('time').annotate(consumption=Sum('consumption'))
+    return JsonResponse({'data': list(qs)})
