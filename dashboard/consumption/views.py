@@ -2,14 +2,12 @@
 from __future__ import unicode_literals
 
 from django.core.serializers import serialize
-from django.db.models import Sum, Avg
-from django.db.models.functions import TruncDay
 from django.http import JsonResponse
 from django.views import generic
 from django.views.decorators.http import require_http_methods
 
 from consumption.encoders import ConsumptionRollupEncoder
-from consumption.models import User, Consumption, ConsumptionRollup
+from consumption.models import User, ConsumptionRollup
 
 
 class SummaryView(generic.ListView):
