@@ -1,15 +1,15 @@
 $(document).ready(function () {
-    var $detailAvgChart = $('#detail-average-chart');
+    var $detailSumChart = $('#detail-sum-chart');
 
-    if ($detailAvgChart.length) {
-        showLoadingSpinnerOnChart('#detail-chart');
+    if ($detailSumChart.length) {
+        showLoadingSpinnerOnChart('#detail-sum-chart');
 
         var options = {dataType: 'json'};
-        var userId = $detailAvgChart.data('user-id');
-        var summaryDataReq = $.ajax(['/api', 'v1', 'consumptions'].join('/'), options);
-        var detailDataReq = $.ajax(['/api', 'v1', 'consumptions', userId].join('/'), options);
+        var userId = $detailSumChart.data('user-id');
+        var summary = $.ajax(['/api', 'v1', 'consumptions'].join('/'), options);
+        var detail = $.ajax(['/api', 'v1', 'consumptions', userId].join('/'), options);
 
-        $.when(summaryDataReq, detailDataReq)
+        $.when(summary, detail)
             .then(onDetailDataLoaded, onDetailDataError)
             .always(hideLoadingSpinner);
     }
@@ -47,7 +47,7 @@ function onDetailDataLoaded(summaryResponse, detailResponse) {
         type: 'line',
         options: options,
         data: {
-            labels: userData['labels'],
+            labels: summaryData['labels'],
             datasets: [
                 {
                     label: 'User ' + userId + ' Average Consumption',

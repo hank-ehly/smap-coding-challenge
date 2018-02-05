@@ -30,11 +30,11 @@ class Command(BaseCommand):
         if user_data_path is None:
             user_data_path = USER_DATA_PATH
 
+        if not os.path.exists(user_data_path):
+            raise CommandError('The following path does not exist: %s' % user_data_path)
+
         self.stdout.write('Importing user data from %s' % user_data_path)
         User.objects.all().delete()
-
-        if not os.path.exists(user_data_path):
-            raise CommandError('The following user data path does not exist: %s' % user_data_path)
 
         df = pd.read_csv(user_data_path)
 
@@ -45,6 +45,9 @@ class Command(BaseCommand):
     def import_consumptions(self, consumption_data_dir=None):
         if consumption_data_dir is None:
             consumption_data_dir = CONSUMPTION_DATA_DIR
+
+        if not os.path.exists(consumption_data_dir):
+            raise CommandError('The following path does not exist: %s' % consumption_data_dir)
 
         Consumption.objects.all().delete()
 

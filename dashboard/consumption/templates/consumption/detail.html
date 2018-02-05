@@ -11,6 +11,7 @@
         {% include "consumption/alert.html" with message='An error has occurred while loading user detail data. Please try reloading the page.' %}
 
         <div class="chart-container">
+            {% include "consumption/spinner.html" %}
             <canvas id="detail-sum-chart" width="100%" height="400" data-user-id="{{ user.pk }}"></canvas>
         </div>
     </section>
@@ -20,7 +21,6 @@
         <p class="lead">User {{ user.pk }}'s average consumption compared to that of all users. Show or hide each line by clicking the title.</p>
 
         <div class="chart-container">
-            {% include "consumption/spinner.html" %}
             <canvas id="detail-average-chart" width="100%" height="400" data-user-id="{{ user.pk }}"></canvas>
         </div>
     </section>
