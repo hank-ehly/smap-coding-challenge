@@ -16,7 +16,7 @@ This approach has some drawbacks, including (but not limited to):
 - High memory allocation (depends on size of CSV files)
 - Duplicate record verification may be problematic
 
-I think these drawbacks are relatively small compared to the readability and simplicity of the implementation. In addition, `pandas` is frequently used in data processing, so there's a good chance it could be used elsewhere in the app later.
+I think these drawbacks are relatively small considering the readability and simplicity of the implementation. In addition, `pandas` is frequently used in data processing, so there's a good chance it could be used elsewhere in the app later.
 
 ### Front End Code Organization
 
