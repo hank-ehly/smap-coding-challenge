@@ -20,12 +20,6 @@ var SCC = (function () {
         $('.lds-ring').hide();
     };
 
-    var replaceChartData = function (chart, data) {
-        chart.data.labels = data.labels;
-        chart.data.datasets = data.datasets;
-        chart.update();
-    };
-
     var readSummaryConsumptionData = function (data) {
         data = JSON.parse(data);
 
@@ -117,7 +111,6 @@ var SCC = (function () {
         colors: colors,
         showLoadingSpinnerOnChart: showLoadingSpinnerOnChart,
         hideLoadingSpinner: hideLoadingSpinner,
-        replaceChartData: replaceChartData,
         readSummaryConsumptionData: readSummaryConsumptionData,
         readDetailConsumptionData: readDetailConsumptionData,
         LineChart: LineChart
