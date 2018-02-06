@@ -1,86 +1,125 @@
-function showLoadingSpinnerOnChart(selector) {
-    if (!$(selector).length) {
-        return;
-    }
+var SCC = (function () {
+    var colors = {
+        red: 'rgba(255, 88, 121, 1)',
+        blue: 'rgba(47, 152, 232, 1)'
+    };
 
-    var $spinner = $('.lds-ring');
-    var yOffset = $(selector).position().top + ($(selector).outerHeight() / 2) - ($spinner.outerHeight() / 2);
+    var showLoadingSpinnerOnChart = function (selector) {
+        if (!$(selector).length) {
+            return;
+        }
 
-    $spinner.css({top: yOffset + 'px'});
-    $spinner.show();
-}
+        var $spinner = $('.lds-ring');
+        var yOffset = $(selector).position().top + ($(selector).outerHeight() / 2) - ($spinner.outerHeight() / 2);
 
-function hideLoadingSpinner() {
-    $('.lds-ring').hide();
-}
+        $spinner.css({top: yOffset + 'px'});
+        $spinner.show();
+    };
 
-function numberWithCommas(number) {
-    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
+    var hideLoadingSpinner = function () {
+        $('.lds-ring').hide();
+    };
 
-function defaultChartOptions() {
-    return {
-        maintainAspectRatio: false,
-        scales: {
-            yAxes: [{
-                ticks: {
-                    callback: function (label) {
-                        if (Math.floor(label) === label) {
-                            return numberWithCommas(label);
-                        }
-                    }
-                }
-            }]
+    var replaceChartData = function (chart, data) {
+        chart.data.labels = data.labels;
+        chart.data.datasets = data.datasets;
+        chart.update();
+    };
+
+    var readSummaryConsumptionData = function (data) {
+        data = JSON.parse(data);
+
+        var dates = data.map(function (row) {
+            return row['fields']['date'].substr(0, 10);
+        });
+
+        var sum = data.map(function (row) {
+            return row['fields']['sum']
+        });
+
+        var average = data.map(function (row) {
+            return row['fields']['average']
+        });
+
+        return {
+            labels: dates,
+            sum: sum,
+            average: average
         }
     };
-}
 
-function replaceChartData(chart, data) {
-    chart.data.labels = data.labels;
-    chart.data.datasets = data.datasets;
-    chart.update();
-}
+    var readDetailConsumptionData = function (data) {
+        var dates = data.map(function (row) {
+            return row['date'].substr(0, 10);
+        });
 
-function readSummaryConsumptionData(data) {
-    data = JSON.parse(data);
+        var sum = data.map(function (row) {
+            return row['sum']
+        });
 
-    var dates = data.map(function (row) {
-        return row['fields']['date'].substr(0, 10);
-    });
+        var average = data.map(function (row) {
+            return row['average']
+        });
 
-    var sum = data.map(function (row) {
-        return row['fields']['sum']
-    });
+        return {
+            labels: dates,
+            sum: sum,
+            average: average
+        }
+    };
 
-    var average = data.map(function (row) {
-        return row['fields']['average']
-    });
+    function numberWithCommas(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function LineChart(selector, data) {
+        function buildDatasets(datasets) {
+            return datasets.map(function (dataset) {
+                var color = dataset.color || colors.red;
+                return Object.assign(dataset, {
+                    backgroundColor: color,
+                    borderColor: color,
+                    fill: false
+                });
+            });
+        }
+
+        this.replaceData = function (data) {
+            this.chart.data.labels = data.labels;
+            this.chart.data.datasets = buildDatasets(data.datasets);
+            this.chart.update();
+        };
+
+        this.chart = new Chart($(selector), {
+            type: 'line',
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            callback: function (label) {
+                                if (Math.floor(label) === label) {
+                                    return numberWithCommas(label);
+                                }
+                            }
+                        }
+                    }]
+                }
+            },
+            data: {
+                labels: data.labels || [],
+                datasets: buildDatasets(data.datasets)
+            }
+        });
+    }
 
     return {
-        labels: dates,
-        sum: sum,
-        average: average
+        colors: colors,
+        showLoadingSpinnerOnChart: showLoadingSpinnerOnChart,
+        hideLoadingSpinner: hideLoadingSpinner,
+        replaceChartData: replaceChartData,
+        readSummaryConsumptionData: readSummaryConsumptionData,
+        readDetailConsumptionData: readDetailConsumptionData,
+        LineChart: LineChart
     }
-}
-
-function readDetailConsumptionData(response) {
-    var data = response;
-
-    var dates = data.map(function (row) {
-        return row['date'].substr(0, 10);
-    });
-
-    var sum = data.map(function (row) {
-        return row['sum']
-    });
-
-    var average = data.map(function (row) {
-        return row['average']
-    });
-
-    return {
-        labels: dates,
-        sum: sum,
-        average: average
-    }
-}
+})();
