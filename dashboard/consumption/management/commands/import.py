@@ -62,6 +62,7 @@ class Command(BaseCommand):
             df = pd.read_csv(data_path)
             df['datetime'] = pd.to_datetime(df['datetime'], utc=True)
             df['user_id'] = user.pk
+            df = df.drop_duplicates(subset='datetime')
 
             Consumption.objects.bulk_create(
                 Consumption(**vals) for vals in df.to_dict('records')

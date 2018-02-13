@@ -16,6 +16,7 @@ class ImportTest(TestCase):
         fixtures_dir = os.path.join(BASE_DIR, 'consumption', 'tests', 'fixtures')
         self.test_user_data_path = os.path.join(fixtures_dir, 'user_data.csv')
         self.test_consumption_data_dir = os.path.join(fixtures_dir, 'consumption')
+        self.dup_consumption_data_dir = os.path.join(fixtures_dir, 'duplicate_consumption')
         self.out = StringIO()
 
     def test_import_user_data(self):
@@ -37,3 +38,14 @@ class ImportTest(TestCase):
         with self.assertRaises(CommandError) as ctx:
             call_command('import', user_data_path=self.test_user_data_path, consumption_data_dir='/foo', stdout=self.out)
         self.assertEqual('The following path does not exist: /foo', str(ctx.exception))
+
+    def test_duplicate_datetime(self):
+        call_command('import', user_data_path=self.test_user_data_path, consumption_data_dir=self.dup_consumption_data_dir, stdout=self.out)
+
+        dup_filter = Consumption.objects.filter(user_id=3000).filter(datetime='2016-07-15 00:00:00')
+        self.assertEqual(dup_filter.count(), 1)
+        self.assertEqual(dup_filter.first().consumption, 1000)
+
+        dup_entry_count = Consumption.objects.filter(user_id=3000).filter(consumption=9999).count()
+        self.assertEqual(dup_entry_count, 0)
+
